@@ -71,7 +71,7 @@ function entropyToMnemonic(entropy, wordlist) {
   return words.join(' ')
 }
 
-function generateMnemonic(strength, rng, wordlist) {
+function generateMnemonic(strength, rng) {
   return new Promise((resolve, reject) => {
     strength = strength || 128
     rng = rng || randomBytes
@@ -80,7 +80,7 @@ function generateMnemonic(strength, rng, wordlist) {
       if (error) {
         reject(error)
       } else {
-        resolve(entropyToMnemonic(randomBytesBuffer.toString('hex'), wordlist))
+        resolve(entropyToMnemonic(randomBytesBuffer.toString('hex'), DEFAULT_WORDLIST))
       }
     })
   })
