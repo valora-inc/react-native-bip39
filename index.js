@@ -5,6 +5,7 @@ var createHash = require('react-native-crypto').createHash
 var randomBytes = require('react-native-secure-randombytes').randomBytes
 
 var DEFAULT_WORDLIST = require('./wordlists/en.json')
+var SPANISH_WORDLIST = require('./wordlists/es.json')
 
 function mnemonicToSeed(mnemonic, password) {
   var mnemonicBuffer = new Buffer(mnemonic, 'utf8')
@@ -131,6 +132,7 @@ module.exports = {
   generateMnemonic: generateMnemonic,
   validateMnemonic: validateMnemonic,
   wordlists: {
-    EN: DEFAULT_WORDLIST
+    EN: DEFAULT_WORDLIST,
+    ES: SPANISH_WORDLIST
   }
 }
