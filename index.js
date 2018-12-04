@@ -6,6 +6,7 @@ var randomBytes = require('react-native-secure-randombytes').randomBytes
 
 var DEFAULT_WORDLIST = require('./wordlists/en.json')
 var SPANISH_WORDLIST = require('./wordlists/es.json')
+var allWordlists = [DEFAULT_WORDLIST, SPANISH_WORDLIST]
 
 function mnemonicToSeed(mnemonic, password) {
   var mnemonicBuffer = new Buffer(mnemonic, 'utf8')
@@ -87,14 +88,15 @@ function generateMnemonic(strength, rng, wordlist) {
   })
 }
 
-function validateMnemonic(mnemonic, wordlist) {
-  try {
-    mnemonicToEntropy(mnemonic, wordlist)
-  } catch (e) {
-    return false
-  }
-
-  return true
+function validateMnemonic(mnemonic) {  
+  return allWordlists.some(function(wordlist) {
+    try {
+      mnemonicToEntropy(mnemonic, wordlist)
+    } catch (e) {
+      return false
+    }
+    return true
+  })
 }
 
 function checksumBits(entropyBuffer) {
