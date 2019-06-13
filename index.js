@@ -2,7 +2,7 @@ var unorm = require('unorm')
 var assert = require('assert')
 var pbkdf2 = require('react-native-crypto').pbkdf2Sync
 var createHash = require('react-native-crypto').createHash
-var randomBytes = require('react-native-secure-randombytes').randomBytes
+var randomBytes = require('react-native-securerandom').generateSecureRandom
 
 var DEFAULT_WORDLIST = require('./wordlists/en.json')
 var SPANISH_WORDLIST = require('./wordlists/es.json')
@@ -78,12 +78,12 @@ function generateMnemonic(strength, rng, wordlist) {
     strength = strength || 128
     rng = rng || randomBytes
 
-    rng(strength / 8, (error, randomBytesBuffer) => {
-      if (error) {
-        reject(error)
-      } else {
-        resolve(entropyToMnemonic(randomBytesBuffer.toString('hex'), wordlist))
+    rng(strength / 8).then(randomBytesBuffer => {
+      if (!randomBytesBuffer) {
+        reject('Empty random bytes buffer')
       }
+      const hexBuffer = toHexString(randomBytesBuffer)
+      resolve(entropyToMnemonic(hexBuffer, wordlist))
     })
   })
 }
@@ -124,6 +124,13 @@ function bytesToBinary(bytes) {
 function lpad(str, padString, length) {
   while (str.length < length) str = padString + str;
   return str;
+}
+
+function toHexString(byteArray) {
+  return Array.from(byteArray, byte => {
+    // tslint:disable-next-line: no-bitwise
+    return ('0' + (byte & 0xff).toString(16)).slice(-2)
+  }).join('')
 }
 
 module.exports = {
