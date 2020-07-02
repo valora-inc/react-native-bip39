@@ -14,7 +14,7 @@ async function mnemonicToSeed(mnemonic, password) {
     mnemonicBuffer,
     saltBuffer,
     2048,
-    32,
+    64,
     "sha512"
   );
 }
