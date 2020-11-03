@@ -2,9 +2,11 @@
   "name": "react-native-bip39",
   "version": "2.2.0",
   "description": "ReactNative-ready Bitcoin BIP39: Mnemonic code for generating deterministic keys",
-  "main": "index.js",
+  "main": "lib/commonjs/index.js",
+  "module": "lib/module/index.js",
   "scripts": {
-    "standard": "standard"
+    "standard": "standard",
+    "prepare": "bob build"
   },
   "author": "Alberto Dallaporta",
   "contributors": [],
@@ -17,13 +19,43 @@
     "create-hash": "^1.1.0",
     "react-native-crypto": "^2.0.1",
     "react-native-fast-crypto": "https://github.com/celo-org/react-native-fast-crypto#df1c171",
-    "react-native-secure-randombytes": "^2.2.3",
+    "react-native-securerandom": "1.0.0",
     "unorm": "^1.3.3"
   },
   "devDependencies": {
-    "nyc": "^8.3.0",
-    "proxyquire": "^1.7.10",
-    "standard": "*",
-    "tape": "^4.6.2"
-  }
+    "@react-native-community/bob": "^0.16.2",
+    "nyc": "^15.1.0",
+    "proxyquire": "^2.1.3",
+    "standard": "16.0.1",
+    "tape": "^5.0.1",
+    "typescript": "^4.0.5"
+  },
+  "react-native": "index.js",
+  "types": "lib/typescript/index.d.ts",
+  "files": [
+    ".",
+    "index.ts",
+    "lib",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__"
+  ],
+  "@react-native-community/bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      [
+        "commonjs",
+        {
+          "copyFlow": true
+        }
+      ],
+      "module",
+      "typescript"
+    ]
+  },
+  "eslintIgnore": [
+    "node_modules/",
+    "lib/"
+  ]
 }
