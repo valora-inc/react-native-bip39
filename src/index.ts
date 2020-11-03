@@ -1,7 +1,7 @@
 var unorm = require("unorm");
 var assert = require("assert");
 var pbkdf2 = require("react-native-fast-crypto").pbkdf2;
-var createHash = require("react-native-crypto").createHash;
+var createHash = require("create-hash");
 import { generateSecureRandom } from "react-native-securerandom";
 
 declare type RandomNumberGenerator = (
@@ -9,8 +9,8 @@ declare type RandomNumberGenerator = (
   callback: (err: Error | null, buf: Buffer) => void
 ) => void;
 
-var DEFAULT_WORDLIST = require("./wordlists/en.json");
-var SPANISH_WORDLIST = require("./wordlists/es.json");
+var DEFAULT_WORDLIST = require("../wordlists/en.json");
+var SPANISH_WORDLIST = require("../wordlists/es.json");
 
 async function mnemonicToSeed(mnemonic: string, password: string) {
   var mnemonicBuffer = Buffer.from(mnemonic, "utf8");
