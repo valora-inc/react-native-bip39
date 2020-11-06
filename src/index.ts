@@ -1,6 +1,6 @@
 var unorm = require("unorm");
 var assert = require("assert");
-var pbkdf2 = require("react-native-fast-crypto").pbkdf2;
+var pbkdf2 = require("@celo/react-native-fast-crypto").pbkdf2;
 var createHash = require("create-hash");
 import { generateSecureRandom } from "react-native-securerandom";
 
