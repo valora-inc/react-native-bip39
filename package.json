@@ -5,8 +5,7 @@
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
   "scripts": {
-    "standard": "standard",
-    "prepare": "bob build"
+    "standard": "standard"
   },
   "author": "Alberto Dallaporta",
   "contributors": [],
