@@ -6,6 +6,7 @@ var randomBytes = require("react-native-secure-randombytes").randomBytes;
 
 var DEFAULT_WORDLIST = require("./wordlists/en.json");
 var SPANISH_WORDLIST = require("./wordlists/es.json");
+var PORTUGUESE_WORDLIST = require("./wordlists/pt.json");
 
 async function mnemonicToSeed(mnemonic, password) {
   var mnemonicBuffer = new Buffer(mnemonic, "utf8");
@@ -144,6 +145,7 @@ module.exports = {
   validateMnemonic: validateMnemonic,
   wordlists: {
     EN: DEFAULT_WORDLIST,
-    ES: SPANISH_WORDLIST
+    ES: SPANISH_WORDLIST,
+    PT: PORTUGUESE_WORDLIST
   }
 };
