@@ -1,16 +1,21 @@
 var unorm = require("unorm");
 var assert = require("assert");
-var pbkdf2 = require("react-native-fast-crypto").pbkdf2;
-var createHash = require("react-native-crypto").createHash;
-var randomBytes = require("react-native-secure-randombytes").randomBytes;
+var pbkdf2 = require("@celo/react-native-fast-crypto").pbkdf2;
+var createHash = require("create-hash");
+import { generateSecureRandom } from "react-native-securerandom";
 
-var DEFAULT_WORDLIST = require("./wordlists/en.json");
-var SPANISH_WORDLIST = require("./wordlists/es.json");
+declare type RandomNumberGenerator = (
+  size: number,
+  callback: (err: Error | null, buf: Buffer) => void
+) => void;
+
+var DEFAULT_WORDLIST = require("../wordlists/en.json");
+var SPANISH_WORDLIST = require("../wordlists/es.json");
 var PORTUGUESE_WORDLIST = require("./wordlists/pt.json");
 
-async function mnemonicToSeed(mnemonic, password) {
-  var mnemonicBuffer = new Buffer(mnemonic, "utf8");
-  var saltBuffer = new Buffer(salt(password), "utf8");
+async function mnemonicToSeed(mnemonic: string, password: string) {
+  var mnemonicBuffer = Buffer.from(mnemonic, "utf8");
+  var saltBuffer = Buffer.from(salt(password), "utf8");
   return await pbkdf2.deriveAsync(
     mnemonicBuffer,
     saltBuffer,
@@ -20,12 +25,12 @@ async function mnemonicToSeed(mnemonic, password) {
   );
 }
 
-async function mnemonicToSeedHex(mnemonic, password) {
+async function mnemonicToSeedHex(mnemonic: string, password: string) {
   var seed = await mnemonicToSeed(mnemonic, password);
   return seed.toString("hex");
 }
 
-function mnemonicToEntropy(mnemonic, wordlist) {
+function mnemonicToEntropy(mnemonic: string, wordlist: string[]) {
   wordlist = wordlist || DEFAULT_WORDLIST;
 
   var words = mnemonic.split(" ");
@@ -51,10 +56,12 @@ function mnemonicToEntropy(mnemonic, wordlist) {
   var checksum = bits.slice(dividerIndex);
 
   // calculate the checksum and compare
-  var entropyBytes = entropy.match(/(.{1,8})/g).map(function(bin) {
+  var entropyBytes = (entropy.match(/(.{1,8})/g) as Array<string>).map(function(
+    bin
+  ) {
     return parseInt(bin, 2);
   });
-  var entropyBuffer = new Buffer(entropyBytes);
+  var entropyBuffer = Buffer.from(entropyBytes);
   var newChecksum = checksumBits(entropyBuffer);
 
   assert(newChecksum === checksum, "Invalid mnemonic checksum");
@@ -62,17 +69,17 @@ function mnemonicToEntropy(mnemonic, wordlist) {
   return entropyBuffer.toString("hex");
 }
 
-function entropyToMnemonic(entropy, wordlist) {
+function entropyToMnemonic(entropy: string, wordlist: string[]) {
   wordlist = wordlist || DEFAULT_WORDLIST;
 
-  var entropyBuffer = new Buffer(entropy, "hex");
+  var entropyBuffer = Buffer.from(entropy, "hex");
   var entropyBits = bytesToBinary([].slice.call(entropyBuffer));
   var checksum = checksumBits(entropyBuffer);
 
   var bits = entropyBits + checksum;
   var chunks = bits.match(/(.{1,11})/g);
 
-  var words = chunks.map(function(binary) {
+  var words = chunks.map(function(binary: string) {
     var index = parseInt(binary, 2);
 
     return wordlist[index];
@@ -81,22 +88,29 @@ function entropyToMnemonic(entropy, wordlist) {
   return words.join(" ");
 }
 
-function generateMnemonic(strength, rng, wordlist) {
+function generateMnemonic(
+  strength?: number,
+  rng?: RandomNumberGenerator,
+  wordlist?: string[]
+) {
   return new Promise((resolve, reject) => {
     strength = strength || 128;
-    rng = rng || randomBytes;
-
-    rng(strength / 8, (error, randomBytesBuffer) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(entropyToMnemonic(randomBytesBuffer.toString("hex"), wordlist));
-      }
-    });
+    rng = rng || generateSecureRandom;
+    generateSecureRandom(strength / 8)
+      .then((bytes) => {
+        if (!wordlist) {
+          throw new Error("No wordlist");
+        }
+        const hexBuffer = Buffer.from(bytes).toString("hex");
+        resolve(entropyToMnemonic(hexBuffer, wordlist));
+      })
+      .catch((err) => {
+        reject(err);
+      });
   });
 }
 
-function validateMnemonic(mnemonic, wordlist) {
+function validateMnemonic(mnemonic: string, wordlist: string[]) {
   try {
     mnemonicToEntropy(mnemonic, wordlist);
   } catch (e) {
@@ -105,7 +119,7 @@ function validateMnemonic(mnemonic, wordlist) {
   return true;
 }
 
-function checksumBits(entropyBuffer) {
+function checksumBits(entropyBuffer: Buffer) {
   var hash = createHash("sha256")
     .update(entropyBuffer)
     .digest();
@@ -117,21 +131,21 @@ function checksumBits(entropyBuffer) {
   return bytesToBinary([].slice.call(hash)).slice(0, CS);
 }
 
-function salt(password) {
+function salt(password: string) {
   return "mnemonic" + (unorm.nfkd(password) || ""); // Use unorm until String.prototype.normalize gets better browser support
 }
 
 //=========== helper methods from bitcoinjs-lib ========
 
-function bytesToBinary(bytes) {
+function bytesToBinary(bytes: any) {
   return bytes
-    .map(function(x) {
+    .map(function(x: any) {
       return lpad(x.toString(2), "0", 8);
     })
     .join("");
 }
 
-function lpad(str, padString, length) {
+function lpad(str: string, padString: string, length: number) {
   while (str.length < length) str = padString + str;
   return str;
 }
@@ -146,6 +160,6 @@ module.exports = {
   wordlists: {
     EN: DEFAULT_WORDLIST,
     ES: SPANISH_WORDLIST,
-    PT: PORTUGUESE_WORDLIST
-  }
+    PT: PORTUGUESE_WORDLIST,
+  },
 };
