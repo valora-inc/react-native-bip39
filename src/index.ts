@@ -11,9 +11,16 @@ declare type RandomNumberGenerator = (
 
 var DEFAULT_WORDLIST = require("../wordlists/en.json");
 var SPANISH_WORDLIST = require("../wordlists/es.json");
-var PORTUGUESE_WORDLIST = require("./wordlists/pt.json");
+var PORTUGUESE_WORDLIST = require("../wordlists/pt.json");
 
-async function mnemonicToSeed(mnemonic: string, password: string) {
+export function mnemonicToSeedSync(
+  _mnemonic: string,
+  _password?: string
+): Buffer {
+  throw new Error("Unimplemented method");
+}
+
+export async function mnemonicToSeed(mnemonic: string, password?: string) {
   var mnemonicBuffer = Buffer.from(mnemonic, "utf8");
   var saltBuffer = Buffer.from(salt(password), "utf8");
   return await pbkdf2.deriveAsync(
@@ -25,14 +32,15 @@ async function mnemonicToSeed(mnemonic: string, password: string) {
   );
 }
 
-async function mnemonicToSeedHex(mnemonic: string, password: string) {
+export async function mnemonicToSeedHex(mnemonic: string, password?: string) {
   var seed = await mnemonicToSeed(mnemonic, password);
   return seed.toString("hex");
 }
 
-function mnemonicToEntropy(mnemonic: string, wordlist: string[]) {
-  wordlist = wordlist || DEFAULT_WORDLIST;
-
+export function mnemonicToEntropy(
+  mnemonic: string,
+  wordlist: string[] = DEFAULT_WORDLIST
+) {
   var words = mnemonic.split(" ");
   assert(words.length % 3 === 0, "Invalid mnemonic");
 
@@ -69,9 +77,10 @@ function mnemonicToEntropy(mnemonic: string, wordlist: string[]) {
   return entropyBuffer.toString("hex");
 }
 
-function entropyToMnemonic(entropy: string, wordlist: string[]) {
-  wordlist = wordlist || DEFAULT_WORDLIST;
-
+export function entropyToMnemonic(
+  entropy: string,
+  wordlist: string[] = DEFAULT_WORDLIST
+) {
   var entropyBuffer = Buffer.from(entropy, "hex");
   var entropyBits = bytesToBinary([].slice.call(entropyBuffer));
   var checksum = checksumBits(entropyBuffer);
@@ -88,12 +97,12 @@ function entropyToMnemonic(entropy: string, wordlist: string[]) {
   return words.join(" ");
 }
 
-function generateMnemonic(
+export function generateMnemonic(
   strength?: number,
   rng?: RandomNumberGenerator,
   wordlist?: string[]
 ) {
-  return new Promise((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     strength = strength || 128;
     rng = rng || generateSecureRandom;
     generateSecureRandom(strength / 8)
@@ -110,7 +119,7 @@ function generateMnemonic(
   });
 }
 
-function validateMnemonic(mnemonic: string, wordlist: string[]) {
+export function validateMnemonic(mnemonic: string, wordlist?: string[]) {
   try {
     mnemonicToEntropy(mnemonic, wordlist);
   } catch (e) {
@@ -131,8 +140,8 @@ function checksumBits(entropyBuffer: Buffer) {
   return bytesToBinary([].slice.call(hash)).slice(0, CS);
 }
 
-function salt(password: string) {
-  return "mnemonic" + (unorm.nfkd(password) || ""); // Use unorm until String.prototype.normalize gets better browser support
+function salt(password?: string) {
+  return "mnemonic" + (unorm.nfkd(password || "") || ""); // Use unorm until String.prototype.normalize gets better browser support
 }
 
 //=========== helper methods from bitcoinjs-lib ========
@@ -150,16 +159,22 @@ function lpad(str: string, padString: string, length: number) {
   return str;
 }
 
-module.exports = {
-  mnemonicToSeed: mnemonicToSeed,
-  mnemonicToSeedHex: mnemonicToSeedHex,
-  mnemonicToEntropy: mnemonicToEntropy,
-  entropyToMnemonic: entropyToMnemonic,
-  generateMnemonic: generateMnemonic,
-  validateMnemonic: validateMnemonic,
-  wordlists: {
-    EN: DEFAULT_WORDLIST,
-    ES: SPANISH_WORDLIST,
-    PT: PORTUGUESE_WORDLIST,
-  },
+export const wordlists = {
+  EN: DEFAULT_WORDLIST,
+  ES: SPANISH_WORDLIST,
+  PT: PORTUGUESE_WORDLIST,
 };
+
+// module.exports = {
+//   mnemonicToSeed: mnemonicToSeed,
+//   mnemonicToSeedHex: mnemonicToSeedHex,
+//   mnemonicToEntropy: mnemonicToEntropy,
+//   entropyToMnemonic: entropyToMnemonic,
+//   generateMnemonic: generateMnemonic,
+//   validateMnemonic: validateMnemonic,
+//   wordlists: {
+//     EN: DEFAULT_WORDLIST,
+//     ES: SPANISH_WORDLIST,
+//     PT: PORTUGUESE_WORDLIST,
+//   },
+// };
