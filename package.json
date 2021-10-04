@@ -16,7 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "create-hash": "^1.1.0",
-    "@celo/react-native-fast-crypto": "^1.8.4",
+    "react-native-fast-crypto": "^2.0.0",
     "react-native-securerandom": "1.0.0",
     "unorm": "^1.3.3"
   },
