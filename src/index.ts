@@ -11,6 +11,7 @@ declare type RandomNumberGenerator = (
 
 var DEFAULT_WORDLIST = require("../wordlists/en.json");
 var SPANISH_WORDLIST = require("../wordlists/es.json");
+var GERMAN_WORDLIST = require("../wordlists/de.json");
 
 async function mnemonicToSeed(mnemonic: string, password: string) {
   var mnemonicBuffer = Buffer.from(mnemonic, "utf8");
@@ -157,5 +158,6 @@ module.exports = {
   wordlists: {
     EN: DEFAULT_WORDLIST,
     ES: SPANISH_WORDLIST,
+    DE: GERMAN_WORDLIST
   },
 };
